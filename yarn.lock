@@ -4945,9 +4945,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.5.263":
-  version: 1.5.265
-  resolution: "electron-to-chromium@npm:1.5.265"
-  checksum: 10c0/f0409d15b02b61df5004d2bf6db0a2a01f42273fb46944c243d13139c83e8a07ad556656fd5f09758ae9b612ebf9862535afc6bffd47395890d5df7551274a4b
+  version: 1.5.266
+  resolution: "electron-to-chromium@npm:1.5.266"
+  checksum: 10c0/74ada92ada1ace76ec5b7da8a9cc2d7f03db122a64ac8e12ae30eba3e358ffec443c0c5265bc6edcdeebfa73f449b21c361080c064eb1eec437db2d71fc03248
   languageName: node
   linkType: hard
 
@@ -8655,8 +8655,8 @@ __metadata:
   linkType: hard
 
 "nuqs@npm:^2.4.1":
-  version: 2.8.2
-  resolution: "nuqs@npm:2.8.2"
+  version: 2.8.3
+  resolution: "nuqs@npm:2.8.3"
   dependencies:
     "@standard-schema/spec": "npm:1.0.0"
   peerDependencies:
@@ -8677,7 +8677,7 @@ __metadata:
       optional: true
     react-router-dom:
       optional: true
-  checksum: 10c0/b343d03ed14582a86b1a706547b58d9fe7297d094419efad8f055fd427caade075548d4584a9f1ff4c3fa8dd539f455bd76c989a31f0d4fac58210dc01643d7b
+  checksum: 10c0/0c5afb50f2e3e776800e95a3d4c74ba6f8a3c3934da2c64e521c03470081e9f1f39fd4555ebc511ce9f732fe1a517cf4581fdbde727f0d806ac64a3dc4ffc27f
   languageName: node
   linkType: hard
 
