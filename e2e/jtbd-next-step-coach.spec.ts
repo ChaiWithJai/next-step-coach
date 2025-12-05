@@ -98,8 +98,8 @@ test.describe("JTBD: Next Step Coach - Turn conversations into follow-ups", () =
     // Submit
     await page.getByRole("button", { name: "Get My Next Steps" }).click();
 
-    // Verify loading state appears (button changes to show loading)
-    await expect(page.getByRole("button", { name: "Cancel" })).toBeVisible();
+    // Verify form submission triggered - button changes to "Analyzing..."
+    await expect(page.getByRole("button", { name: "Analyzing..." })).toBeVisible();
   });
 
   test("user can start a new thread while in a conversation", async ({

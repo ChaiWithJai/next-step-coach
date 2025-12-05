@@ -79,8 +79,8 @@ Sales Rep: I'd like to show you our new product...`);
     // Submit
     await page.getByRole("button", { name: "Get Call Feedback" }).click();
 
-    // Verify loading state
-    await expect(page.getByRole("button", { name: "Cancel" })).toBeVisible();
+    // Verify form submission triggered - button changes to "Analyzing..."
+    await expect(page.getByRole("button", { name: "Analyzing..." })).toBeVisible();
   });
 
   test("user can navigate between features", async ({ page }) => {
