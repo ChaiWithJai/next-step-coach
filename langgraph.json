@@ -1,0 +1,11 @@
+{
+  "node_version": "20",
+  "dependencies": [
+    "."
+  ],
+  "graphs": {
+    "next-step-coach": "./apps/agents/src/react-agent/graph.ts:graph",
+    "call-coach": "./apps/agents/src/call-coach-agent/graph.ts:graph"
+  },
+  "env": ".env"
+}
