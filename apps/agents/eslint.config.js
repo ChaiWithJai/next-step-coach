@@ -5,6 +5,11 @@ import importPlugin from "eslint-plugin-import";
 import noInstanceofPlugin from "eslint-plugin-no-instanceof";
 import prettierConfig from "eslint-config-prettier";
 import globals from "globals";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export default [
   js.configs.recommended,
@@ -22,7 +27,7 @@ export default [
         ecmaVersion: 2021,
         sourceType: "module",
         project: "./tsconfig.json",
-        tsconfigRootDir: ".",
+        tsconfigRootDir: __dirname,
       },
       globals: {
         ...globals.node,
