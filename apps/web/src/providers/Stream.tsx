@@ -168,6 +168,11 @@ function FeatureSelector({
 }: {
   onSelectFeature: (featureId: string) => void;
 }) {
+  // Set document title when on dashboard
+  useEffect(() => {
+    document.title = "Sales Coaching Suite";
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen w-full bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="flex-1 flex items-center justify-center p-4">
