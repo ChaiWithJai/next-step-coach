@@ -34,31 +34,35 @@ test.describe("JTBD: Next Step Coach - Turn conversations into follow-ups", () =
     await expect(page.getByRole("heading", { name: "Next Step Coach" })).toBeVisible();
   });
 
-  test("user sees helpful example prompts on empty state", async ({ page }) => {
+  test("user sees structured form for context input", async ({ page }) => {
     // Navigate to Next Step Coach
     await page.getByText("Next Step Coach").click();
 
-    // Verify example prompts are shown
-    await expect(page.getByText("Try saying:")).toBeVisible();
-    await expect(
-      page.getByText(/Had coffee with Sarah from Acme Corp/),
-    ).toBeVisible();
-    await expect(
-      page.getByText(/Met John at the conference/),
-    ).toBeVisible();
+    // Verify structured form is shown (not example prompts)
+    await expect(page.getByText("Who do you need next steps on?")).toBeVisible();
+    await expect(page.getByText("What's your goal for this relationship?")).toBeVisible();
+    await expect(page.getByText("What happened? (brain dump everything)")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Get My Next Steps" })).toBeVisible();
   });
 
-  test("user can click example prompt to populate input", async ({ page }) => {
+  test("user can select relationship type from dropdown", async ({ page }) => {
     // Navigate to Next Step Coach
     await page.getByText("Next Step Coach").click();
 
-    // Click an example prompt
-    const exampleButton = page.getByText(/Had coffee with Sarah from Acme Corp/);
-    await exampleButton.click();
+    // Click the relationship type dropdown
+    await page.getByRole("combobox").click();
 
-    // Verify input is populated
-    const textarea = page.locator("textarea");
-    await expect(textarea).toHaveValue(/Had coffee with Sarah from Acme Corp/);
+    // Verify options are visible
+    await expect(page.getByRole("option", { name: "Customer" })).toBeVisible();
+    await expect(page.getByRole("option", { name: "Funder / Investor" })).toBeVisible();
+    await expect(page.getByRole("option", { name: "Candidate" })).toBeVisible();
+    await expect(page.getByRole("option", { name: "Champion / Advisor" })).toBeVisible();
+
+    // Select an option
+    await page.getByRole("option", { name: "Customer" }).click();
+
+    // Verify selection
+    await expect(page.getByRole("combobox")).toHaveText(/Customer/);
   });
 
   test("user can navigate back to feature dashboard", async ({ page }) => {
@@ -73,22 +77,28 @@ test.describe("JTBD: Next Step Coach - Turn conversations into follow-ups", () =
     await expect(page).toHaveTitle("Sales Coaching Suite");
   });
 
-  test("user can submit brain-dump notes and see loading state", async ({
+  test("user can submit structured form and see loading state", async ({
     page,
   }) => {
     // Navigate to Next Step Coach
     await page.getByText("Next Step Coach").click();
 
-    // Type brain-dump notes
-    const textarea = page.locator("textarea");
-    await textarea.fill(
+    // Select relationship type
+    await page.getByRole("combobox").click();
+    await page.getByRole("option", { name: "Customer" }).click();
+
+    // Fill in goal
+    await page.getByLabel("What's your goal for this relationship?").fill("Close the deal by end of quarter");
+
+    // Fill in context
+    await page.getByLabel("What happened? (brain dump everything)").fill(
       "Had coffee with Sarah from Acme Corp. She mentioned they need help with DevOps.",
     );
 
     // Submit
-    await page.getByRole("button", { name: "Send" }).click();
+    await page.getByRole("button", { name: "Get My Next Steps" }).click();
 
-    // Verify loading state appears (button changes to Cancel)
+    // Verify loading state appears (button changes to show loading)
     await expect(page.getByRole("button", { name: "Cancel" })).toBeVisible();
   });
 
@@ -101,7 +111,7 @@ test.describe("JTBD: Next Step Coach - Turn conversations into follow-ups", () =
     // Click new thread button
     await page.getByRole("button", { name: "New thread" }).click();
 
-    // Verify empty state is shown again
-    await expect(page.getByText("Try saying:")).toBeVisible();
+    // Verify structured form is shown again
+    await expect(page.getByText("Who do you need next steps on?")).toBeVisible();
   });
 });

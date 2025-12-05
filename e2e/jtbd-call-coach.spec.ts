@@ -31,47 +31,53 @@ test.describe("JTBD: Call Coach - Get AI feedback on sales calls", () => {
     await expect(page.getByRole("heading", { name: "Call Coach" })).toBeVisible();
   });
 
-  test("user sees helpful example prompts for call review", async ({
+  test("user sees structured form for transcript input", async ({
     page,
   }) => {
     // Navigate to Call Coach
     await page.getByText("Call Coach").click();
 
-    // Verify example prompts are shown
-    await expect(page.getByText("Try saying:")).toBeVisible();
-    await expect(
-      page.getByText(/transcript from my discovery call/),
-    ).toBeVisible();
-    await expect(page.getByText(/price was too high/)).toBeVisible();
+    // Verify structured form is shown (not example prompts)
+    await expect(page.getByText("Call Transcript")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Paste" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Upload" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Get Call Feedback" })).toBeVisible();
   });
 
-  test("user can click example to ask about objection handling", async ({
+  test("user can toggle between paste and upload modes", async ({
     page,
   }) => {
     // Navigate to Call Coach
     await page.getByText("Call Coach").click();
 
-    // Click the objection handling example
-    const exampleButton = page.getByText(/price was too high/);
-    await exampleButton.click();
+    // Paste should be active by default
+    await expect(page.locator("textarea").first()).toBeVisible();
 
-    // Verify input is populated
-    const textarea = page.locator("textarea");
-    await expect(textarea).toHaveValue(/price was too high/);
+    // Click Upload toggle
+    await page.getByRole("button", { name: "Upload" }).click();
+
+    // Verify upload zone is shown
+    await expect(page.getByText("Drop file or click to browse")).toBeVisible();
+
+    // Click Paste toggle to go back
+    await page.getByRole("button", { name: "Paste" }).click();
+
+    // Verify textarea is visible again
+    await expect(page.locator("textarea").first()).toBeVisible();
   });
 
   test("user can submit call transcript for review", async ({ page }) => {
     // Navigate to Call Coach
     await page.getByText("Call Coach").click();
 
-    // Type a mini transcript
-    const textarea = page.locator("textarea");
+    // Type a mini transcript in the paste mode
+    const textarea = page.locator("textarea").first();
     await textarea.fill(`Sales Rep: Thanks for taking my call today.
 Customer: Sure, what did you want to discuss?
 Sales Rep: I'd like to show you our new product...`);
 
     // Submit
-    await page.getByRole("button", { name: "Send" }).click();
+    await page.getByRole("button", { name: "Get Call Feedback" }).click();
 
     // Verify loading state
     await expect(page.getByRole("button", { name: "Cancel" })).toBeVisible();
