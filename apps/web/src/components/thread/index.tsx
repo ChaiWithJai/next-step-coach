@@ -26,6 +26,7 @@ import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 import ThreadHistory from "./history";
 import { toast } from "sonner";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { FeatureForm, hasCustomForm } from "./forms";
 
 function StickyToBottomContent(props: {
   content: ReactNode;
@@ -172,6 +173,34 @@ export function Thread() {
       checkpoint: parentCheckpoint,
       streamMode: ["values"],
     });
+  };
+
+  // Handle form submission from custom forms
+  const handleFormSubmit = (formattedMessage: string) => {
+    if (!formattedMessage.trim() || isLoading) return;
+    setFirstTokenReceived(false);
+
+    const newHumanMessage: Message = {
+      id: uuidv4(),
+      type: "human",
+      content: formattedMessage,
+    };
+
+    const toolMessages = ensureToolCallsHaveResponses(stream.messages);
+    stream.submit(
+      { messages: [...toolMessages, newHumanMessage] },
+      {
+        streamMode: ["values"],
+        optimisticValues: (prev) => ({
+          ...prev,
+          messages: [
+            ...(prev.messages ?? []),
+            ...toolMessages,
+            newHumanMessage,
+          ],
+        }),
+      },
+    );
   };
 
   // Navigate back to feature selector
@@ -322,102 +351,121 @@ export function Thread() {
               </>
             }
             footer={
-              <div className="sticky flex flex-col items-center gap-6 bottom-0 bg-white">
-                {/* Empty state with feature info and examples */}
+              <div className="sticky flex flex-col items-center bottom-0 bg-white px-4">
+                {/* Empty state with feature info and custom form or examples */}
                 {!chatStarted && currentFeature && (
-                  <div className="flex flex-col items-center gap-4 text-center max-w-xl">
-                    <div className="p-3 rounded-full bg-primary/10">
-                      <currentFeature.icon className="h-8 w-8 text-primary" />
+                  <div className="flex flex-col items-center gap-3 text-center w-full max-w-lg mx-auto">
+                    <div className="p-2 rounded-full bg-primary/10">
+                      <currentFeature.icon className="h-6 w-6 text-primary" />
                     </div>
-                    <h1 className="text-2xl font-semibold tracking-tight">
+                    <h1 className="text-xl font-semibold tracking-tight">
                       {currentFeature.title}
                     </h1>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {currentFeature.description}
                     </p>
-                    <div className="w-full">
-                      <p className="text-sm font-medium text-muted-foreground mb-3">
-                        Try saying:
-                      </p>
-                      <div className="flex flex-col gap-2">
-                        {currentFeature.examples.map((example, i) => (
-                          <button
-                            key={i}
-                            className="text-left text-sm p-3 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
-                            onClick={() => setInput(example)}
-                          >
-                            "{example}"
-                          </button>
-                        ))}
+
+                    {/* Custom form for features that have one */}
+                    {hasCustomForm(currentFeature.id) ? (
+                      <div className="w-full text-left bg-white rounded-xl border shadow-sm p-4 mt-2 max-h-[60vh] overflow-y-auto">
+                        <FeatureForm
+                          featureId={currentFeature.id}
+                          onSubmit={handleFormSubmit}
+                          isSubmitting={isLoading}
+                        />
                       </div>
-                    </div>
+                    ) : (
+                      /* Fallback to examples for features without custom forms */
+                      <div className="w-full mt-2">
+                        <p className="text-sm font-medium text-muted-foreground mb-2">
+                          Try saying:
+                        </p>
+                        <div className="flex flex-col gap-2">
+                          {currentFeature.examples.map((example, i) => (
+                            <button
+                              key={i}
+                              className="text-left text-sm p-3 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+                              onClick={() => setInput(example)}
+                            >
+                              "{example}"
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
                 <ScrollToBottom className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 animate-in fade-in-0 zoom-in-95" />
 
-                <div className="bg-muted rounded-2xl border shadow-xs mx-auto mb-4 w-full max-w-3xl relative z-10">
-                  <form
-                    onSubmit={handleSubmit}
-                    className="grid grid-rows-[1fr_auto] gap-2 max-w-3xl mx-auto"
-                  >
-                    <textarea
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (
-                          e.key === "Enter" &&
-                          !e.shiftKey &&
-                          !e.metaKey &&
-                          !e.nativeEvent.isComposing
-                        ) {
-                          e.preventDefault();
-                          const el = e.target as HTMLElement | undefined;
-                          const form = el?.closest("form");
-                          form?.requestSubmit();
-                        }
-                      }}
-                      placeholder="Type your message..."
-                      className="p-3.5 pb-0 border-none bg-transparent field-sizing-content shadow-none ring-0 outline-none focus:outline-none focus:ring-0 resize-none"
-                    />
-
-                    <div className="flex items-center justify-end p-2 pt-4">
-                      {stream.isLoading ? (
-                        <Button key="stop" onClick={() => stream.stop()}>
-                          <LoaderCircle className="w-4 h-4 animate-spin" />
-                          Cancel
-                        </Button>
-                      ) : (
-                        <Button
-                          type="submit"
-                          className="transition-all shadow-md"
-                          disabled={isLoading || !input.trim()}
-                        >
-                          Send
-                        </Button>
-                      )}
-                    </div>
-                  </form>
-                </div>
-
-                {/* PIE Branding Footer */}
-                <footer className="pb-4 text-center text-xs text-muted-foreground">
-                  <p>
-                    Made with ❤️ by{" "}
-                    <a
-                      href="https://princetonideaexchange.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium hover:underline"
+                {/* Only show default textarea when chat has started OR when there's no custom form */}
+                {(chatStarted ||
+                  !currentFeature ||
+                  !hasCustomForm(currentFeature.id)) && (
+                  <div className="bg-muted rounded-2xl border shadow-xs mx-auto mb-4 w-full max-w-3xl relative z-10">
+                    <form
+                      onSubmit={handleSubmit}
+                      className="grid grid-rows-[1fr_auto] gap-2 max-w-3xl mx-auto"
                     >
-                      Princeton Idea Exchange
-                    </a>
-                  </p>
-                </footer>
-              </div>
+                      <textarea
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (
+                            e.key === "Enter" &&
+                            !e.shiftKey &&
+                            !e.metaKey &&
+                            !e.nativeEvent.isComposing
+                          ) {
+                            e.preventDefault();
+                            const el = e.target as HTMLElement | undefined;
+                            const form = el?.closest("form");
+                            form?.requestSubmit();
+                          }
+                        }}
+                        placeholder="Type your message..."
+                        className="p-3.5 pb-0 border-none bg-transparent field-sizing-content shadow-none ring-0 outline-none focus:outline-none focus:ring-0 resize-none"
+                      />
+
+                      <div className="flex items-center justify-end p-2 pt-4">
+                        {stream.isLoading ? (
+                          <Button key="stop" onClick={() => stream.stop()}>
+                            <LoaderCircle className="w-4 h-4 animate-spin" />
+                            Cancel
+                          </Button>
+                        ) : (
+                          <Button
+                            type="submit"
+                            className="transition-all shadow-md"
+                            disabled={isLoading || !input.trim()}
+                          >
+                            Send
+                          </Button>
+                        )}
+                      </div>
+                    </form>
+                  </div>
+                )}
+
+                </div>
             }
           />
         </StickToBottom>
+
+        {/* PIE Branding Footer */}
+        <footer className="py-3 text-center text-sm text-muted-foreground border-t bg-white/50">
+          <p>
+            Made with ❤️ by{" "}
+            <a
+              href="https://princetonideaexchange.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-primary hover:underline"
+            >
+              Princeton Idea Exchange
+            </a>
+          </p>
+        </footer>
       </motion.div>
     </div>
   );
