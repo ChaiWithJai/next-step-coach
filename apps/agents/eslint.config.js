@@ -68,7 +68,7 @@ export default [
       "import/extensions": [2, "ignorePackages"],
       "import/no-extraneous-dependencies": [
         "error",
-        { devDependencies: ["**/*.test.ts"] },
+        { devDependencies: ["**/*.test.ts", "**/*.int.test.ts", "**/*.spec.ts"] },
       ],
       "import/no-unresolved": 0,
       "import/prefer-default-export": 0,

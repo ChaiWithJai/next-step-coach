@@ -15,7 +15,9 @@ describe("cn utility function", () => {
   });
 
   it("should handle conditional classes", () => {
-    expect(cn("base", true && "included", false && "excluded")).toBe(
+    const shouldInclude = true;
+    const shouldExclude = false;
+    expect(cn("base", shouldInclude && "included", shouldExclude && "excluded")).toBe(
       "base included",
     );
   });
